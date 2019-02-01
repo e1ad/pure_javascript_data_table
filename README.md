@@ -1,1 +1,1 @@
-"# pure_javascript_data_table" 
+Pure Javascript Data Table
