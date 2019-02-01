@@ -1,0 +1,47 @@
+.data-table table{
+    border-collapse: collapse;
+}
+
+.data-table th{
+    padding: 5px 30px 5px 35px;
+}
+
+.data-table th > .sort{
+ position: absolute;
+ top: 1px;
+ right: 0;
+}
+
+.data-table [action="sortDown"]{
+    margin-top:-3px;
+}
+
+.data-table th > .sort > span{
+    display: block;
+    z-index: 2;
+    cursor: pointer;
+    font-size: 21px;
+    opacity: 0.5;
+    line-height: 14px;
+}
+
+.data-table th > .sort > span.selected{
+    opacity: 1;
+}
+
+.data-table th,
+.data-table td{
+    position: relative;
+    text-align: center;
+    border: solid 1px #eee;
+}
+
+.data-table td{
+    padding: 5px;
+}
+
+.data-table footer {
+    margin-top: 5px;
+}
+
+
