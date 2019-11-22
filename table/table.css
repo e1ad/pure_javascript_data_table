@@ -1,5 +1,11 @@
-.data-table table{
+.data-table{
+    width: 500px;
+    height: 400px;
+}
+
+ table{
     border-collapse: collapse;
+    width: 100%;
 }
 
 .data-table th{
@@ -33,7 +39,7 @@
 .data-table td{
     position: relative;
     text-align: center;
-    border: solid 1px #eee;
+    border: solid 1px #d9dcde;
 }
 
 .data-table td{

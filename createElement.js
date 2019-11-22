@@ -9,7 +9,6 @@ const createElement = (tag, attributs = {}, children) => {
             const text = document.createTextNode(children);
             element.appendChild(text);
             break;
-
         default:
             break;
     }

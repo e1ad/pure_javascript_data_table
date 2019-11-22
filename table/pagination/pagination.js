@@ -1,21 +1,25 @@
 class Pagination {
 
     constructor(target) {
+        this.SELECTED_ATTR = 'selected';
+        this.PAGE_NUMBER_CLASS = 'page-number';
+
+
         if (target) {
             this.target = target;
             this.maxPages = 12;
             this.currentPage = 0;
             this.target.appendChild(document.createElement('ul'));
-            this.target.setAttribute("class", "pagination");
+            this.target.setAttribute('class', 'pagination');
             this.addClickListener();
         }
     }
 
 
     addClickListener() {
-        this.target.addEventListener("click", (event) => {
-            if (event.target.nodeName == "LI") {
-                if (event.target.className.indexOf("page-number") > -1 && typeof (this.onClick) === 'function') {
+        this.target.addEventListener('click', (event) => {
+            if (event.target.nodeName == 'LI') {
+                if (event.target.className.indexOf(this.PAGE_NUMBER_CLASS) > -1 && typeof (this.onClick) === 'function') {
                     const currentPage = Number(event.target.innerText) - 1;
                     this.setSelectedPage(currentPage);
                     this.onClick(currentPage);
@@ -76,9 +80,14 @@ class Pagination {
     }
 
 
+    createNavIcon(action) {
+        const icon = action === 'previous' ? 'navigate_before' : 'navigate_next';
+        return createElement('li', { action: action, class: 'material-icons' }, icon);
+    }
+
     addPreviousNav(ul) {
         if (this.pages > this.maxPages) {
-            const li = createElement('li', { "action": "previous", "class": "material-icons" }, "navigate_before");
+            const li = this.createNavIcon('previous');
             ul.appendChild(li);
         }
     }
@@ -86,7 +95,7 @@ class Pagination {
 
     addNextNav(ul) {
         if (this.currentPage < this.pages) {
-            const li = createElement('li', { "action": "next", "class": "material-icons" }, "navigate_next");;
+            const li = this.createNavIcon('next');
             ul.appendChild(li);
         }
     }
@@ -97,11 +106,11 @@ class Pagination {
         const ul = document.createElement('ul');
         this.addPreviousNav(ul)
         for (let i = min; i < max; i++) {
-            const li = createElement('li', { "class": "page-number" }, i + 1);
+            const li = createElement('li', { class: this.PAGE_NUMBER_CLASS }, i + 1);
             ul.appendChild(li);
         }
         this.addNextNav(ul)
-        this.target.querySelector("ul").replaceWith(ul);
+        this.target.querySelector('ul').replaceWith(ul);
     }
 
 
@@ -109,14 +118,14 @@ class Pagination {
         if (typeof (currentPage) === 'number') {
             this.currentPage = currentPage;
         }
-        const lis = this.target.querySelectorAll("ul > li");
+        const lis = this.target.querySelectorAll('ul > li');
         lis.forEach(li => {
             const pageNumber = Number(li.innerText) - 1;
             if (pageNumber == this.currentPage) {
-                li.classList.add("selected");
+                li.classList.add(this.SELECTED_ATTR);
             }
-            else if (li.className.indexOf("selected") > -1) {
-                li.classList.remove("selected");
+            else if (li.className.indexOf(this.SELECTED_ATTR) > -1) {
+                li.classList.remove(this.SELECTED_ATTR);
             }
         });
     }

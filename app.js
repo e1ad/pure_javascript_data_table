@@ -1,9 +1,8 @@
-
-
 const data = [];
+
 for (let i = 0; i <= 1000; i++) {
     data.push({
-        name: "elad" + i,
+        name: 'elad' + i,
         age: i
     });
 }
@@ -12,7 +11,7 @@ for (let i = 0; i <= 1000; i++) {
 const replaceData = [];
 for (let i = 0; i <= 1000; i++) {
     replaceData.push({
-        name: "noy" + i,
+        name: 'noy' + i,
         age: i
     });
 }
@@ -20,21 +19,18 @@ for (let i = 0; i <= 1000; i++) {
 
 const cols = [
     {
-        header: "Name",
-        key: "name",
-        input: {
-            type: "text"
-        },
+        header: 'Name',
+        key: 'name',
         startSort: true,
         className: function (row, col) {
-            return row[col.key] == "elad1" ? 'test' : '';
+            return row[col.key] == 'elad1' ? 'test' : '';
         }
     },
     {
-        header: "Age",
-        key: "age",
+        header: 'Age',
+        key: 'age',
         input: {
-            type: "text"
+            type: 'text'
         }
     },
 
@@ -47,14 +43,14 @@ let table;
 const options = {
     onRowClick: (row) => {
         console.log(row);
-    }
+    },
 }
 
 
-document.addEventListener("DOMContentLoaded", function (event) {
+document.addEventListener('DOMContentLoaded', function (event) {
 
 
-    table = new Table("#dataTable", options);
+    table = new Table('#dataTable', options);
 
     table.start(data, cols);
 
@@ -63,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
 
 const replace = () => {
-    console.log("replace");
+    console.log('replace');
+    console.log(replaceData)
     table.start(replaceData, cols);
 }

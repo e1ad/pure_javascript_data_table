@@ -1,12 +1,12 @@
 class Table {
 
 
-    constructor(target, options) {
+    constructor(target, options = {}) {
 
-        this.target = typeof (target) == "string" ? document.querySelector(target) : target;
+        this.target = typeof (target) == 'string' ? document.querySelector(target) : target;
         this.options = options;
         this.currentPage = 0;
-        this.maxRows = 10;
+        this.defaultRowHeight = 32;
 
         if (this.target) {
             this.table = document.createElement('table');
@@ -19,15 +19,26 @@ class Table {
             this.addClickListener();
         }
 
-        this.onPageClick = this.onPageClick.bind(this);
-        this.onInputChanged = this.onInputChanged.bind(this);
+        ['onPageClick', 'onInputChanged', 'onSearchInputListener'].forEach(funName => {
+            this[funName] = this[funName].bind(this)
+        });
 
     }
 
+    getMaxRows() {
+        const tableHeight = this.target.getBoundingClientRect().height;
+        if (this.options.maxRows) {
+            return this.options.maxRows;
+        }
+        else if (tableHeight) {
+            return Math.floor(tableHeight / this.defaultRowHeight);
+        }
+        return 10;
+    }
 
 
     addClickListener() {
-        this.table.addEventListener("click", event => {
+        this.table.addEventListener('click', event => {
             if (this.options && typeof (this.options.onRowClick) == 'function' && event.target.parentElement.attributes.index) {
                 const rowIndex = Number(event.target.parentElement.attributes.index.value);
                 if (this.data[rowIndex]) {
@@ -44,20 +55,31 @@ class Table {
     }
 
 
+    findColByKey(colKey) {
+        return this.cols.find(col => col.key === colKey);
+    }
+
+
     sort(dir, colKey) {
-        this.sortByCol = colKey;
-        this.dir = dir;
-        this.data.sort((a, b) => {
-            return a[colKey] > b[colKey] ? dir : -1 * dir;
-        });
-        this.rederHeader();
-        this.renderBody();
+        if (this.dir != dir || this.sortByCol != colKey) {
+            const col = this.findColByKey(colKey);
+            this.sortByCol = colKey;
+            this.dir = dir;
+            if (typeof (col.sort) == 'object' && col.sort.callBack) {
+                this.data.sort(col.sort.callBack);
+            } else {
+                this.data.sort((a, b) => a[colKey] > b[colKey] ? dir : -1 * dir);
+            }
+            this.rederHeader();
+            this.renderBody();
+        }
     }
 
 
     sortUp(attributes) {
         this.sort(1, attributes.colKey.value);
     }
+
 
     sortDown(attributes) {
         this.sort(-1, attributes.colKey.value);
@@ -74,39 +96,70 @@ class Table {
 
     className(row, col) {
         switch (typeof (col.className)) {
-            case "string":
+            case 'string':
                 return col.className;
-            case "function":
+            case 'function':
                 return col.className(row, col);
             default:
-                return ""
+                return ''
         }
     }
 
 
+    sortArrowIcon(col, direction) {
+        const actionName = direction === 1 ? 'sortUp' : 'sortDown';
+        const icon = direction === 1 ? 'arrow_drop_up' : 'arrow_drop_down';
+        return createElement('span', {
+            class: `material-icons ${col.key == this.sortByCol && this.dir == direction ? 'selected' : ''}`,
+            action: actionName,
+            colKey: col.key
+        }, icon);
+    }
+
     addSortIcons(col) {
-        const spanA2z = createElement('span', {
-            "class": `material-icons ${col.key == this.sortByCol && this.dir == 1 ? 'selected' : ''}`,
-            "action": "sortUp",
-            "colKey": col.key
-        }, "arrow_drop_up");
-        const spanZ2a = createElement('span', {
-            "class": `material-icons ${col.key == this.sortByCol && this.dir == -1 ? 'selected' : ''}`,
-            "action": "sortDown",
-            "colKey": col.key
-        }, "arrow_drop_down");
-        const divContainer = createElement("div", { "class": "sort" });
+        const spanA2z = this.sortArrowIcon(col, 1);
+        const spanZ2a = this.sortArrowIcon(col, -1);
+        const divContainer = createElement('div', { class: 'sort' });
         divContainer.appendChild(spanA2z);
         divContainer.appendChild(spanZ2a);
         return divContainer;
     }
 
 
+    onSearchInputListener(event) {
+        this.currentPage = 0;
+        this.pagination.setSelectedPage(this.currentPage);
+        const colKey = event.target.attributes.colKey && event.target.attributes.colKey.value;
+        this.searchValue = { 'value': event.target.value, 'colKey': colKey };
+        this.renderBody();
+    }
+
+
+    searchAndFilter(data) {
+        if (this.searchValue && this.searchValue.value) {
+            const regex = new RegExp(this.searchValue.value, 'i');
+            return this.data.filter(row => regex.test(row[this.searchValue.colKey]));
+        }
+        return data;
+    }
+
+
+    colSearchHeader(tr, col) {
+        const td = document.createElement('td');
+        const input = document.createElement('input');
+        input.setAttribute('colKey', col.key);
+        td.appendChild(input)
+        tr.appendChild(td);
+    }
+
+
     rederHeader() {
+        this.removeInputListener('thead input', this.onSearchInputListener);
         const thead = document.createElement('thead');
         const tr = document.createElement('tr');
-        thead.appendChild(tr);
-        this.cols.forEach((col) => {
+        const colSearchRow = document.createElement('tr');
+        this.cols.forEach(col => {
+            this.colSearchHeader(colSearchRow, col)
             const th = createElement('th', {}, col.header);
             if (col.sort === undefined || col.sort === true) {
                 const addSortIcons = this.addSortIcons(col);
@@ -114,13 +167,16 @@ class Table {
             }
             tr.appendChild(th);
         });
-        this.table.querySelector("thead").replaceWith(thead);
+        thead.appendChild(colSearchRow);
+        thead.appendChild(tr);
+        this.table.querySelector('thead').replaceWith(thead);
+        this.addInputListener('thead input', this.onSearchInputListener);
     }
 
 
     inputCell(col, value) {
-        const attributs = Object.assign({}, col.input, { "value": value, "colKey": col.key });
-        const input = createElement("input", attributs);
+        const attributs = Object.assign({}, col.input, { value, colKey: col.key });
+        const input = createElement('input', attributs);
         return input;
     }
 
@@ -129,7 +185,7 @@ class Table {
         const td = document.createElement('td');
         const className = this.className(row, col);
         if (className) {
-            td.setAttribute("class", className);
+            td.setAttribute('class', className);
         }
         const value = this.displayValue(row, col);
         let cellText;
@@ -149,23 +205,23 @@ class Table {
         const colKey = event.target.attributes.colKey && event.target.attributes.colKey.value;
         if (this.data[index]) {
             this.data[index][colKey] = event.target.value;
-            event.target.setAttribute("value", event.target.value);
+            event.target.setAttribute('value', event.target.value);
         };
     }
 
 
-    addInputListers() {
-        const inputs = this.table.querySelectorAll("tbody input");
+    addInputListener(selector, func) {
+        const inputs = this.table.querySelectorAll(selector);
         inputs.forEach(input => {
-            input.addEventListener("input", this.onInputChanged, false);
+            input.addEventListener('input', func, false);
         });
     }
 
 
-    removeEventListers() {
-        const inputs = this.table.querySelectorAll("tbody input");
+    removeInputListener(selector, func) {
+        const inputs = this.table.querySelectorAll(selector);
         inputs.forEach(input => {
-            input.removeEventListener("input", this.onInputChanged, false);
+            input.removeEventListener('input', func, false);
         });
     }
 
@@ -177,23 +233,23 @@ class Table {
 
     currentPageData() {
         const offset = this.currentPage * this.maxRows;
-        return this.data.slice(offset, offset + this.maxRows);
+        return this.searchAndFilter(this.data).slice(offset, offset + this.maxRows);
     }
 
 
     renderBody() {
-        this.removeEventListers();
+        this.removeInputListener('tbody input', this.onInputChanged);
         const tbody = document.createElement('tbody');
         this.currentPageData().forEach((row, rowIndex) => {
-            const tr = createElement('tr', { "index": this.dataIndex(rowIndex) });
+            const tr = createElement('tr', { 'index': this.dataIndex(rowIndex) });
             this.cols.forEach((col) => {
                 const td = this.renderCell(row, col);
                 tr.appendChild(td);
             })
             tbody.appendChild(tr);
         });
-        this.table.querySelector("tbody").replaceWith(tbody);
-        this.addInputListers();
+        this.table.querySelector('tbody').replaceWith(tbody);
+        this.addInputListener('tbody input', this.onInputChanged);
     }
 
 
@@ -205,17 +261,17 @@ class Table {
 
     start(data, cols) {
         if (this.target) {
-            this.target.setAttribute("class", "data-table")
+            this.target.setAttribute('class', 'data-table');
             this.data = data;
             this.cols = cols;
-            this.pagination.start(this.data.length, this.maxRows, this.onPageClick);
-            this.rederHeader();
-            this.renderBody();
+            setTimeout(() => {
+                this.maxRows = this.getMaxRows();
+                this.pagination.start(this.data.length, this.maxRows, this.onPageClick);
+                this.rederHeader();
+                this.renderBody();
+            }, 0);
         }
     }
 
 
-
 }
-
-
