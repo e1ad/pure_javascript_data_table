@@ -3,7 +3,7 @@ class Table {
 
     constructor(target, options = {}) {
 
-        this.target = typeof (target) == 'string' ? document.querySelector(target) : target;
+        this.target = isString(target) ? document.querySelector(target) : target;
         this.options = options;
         this.currentPage = 0;
         this.defaultRowHeight = 32;
@@ -39,7 +39,7 @@ class Table {
 
     addClickListener() {
         this.table.addEventListener('click', event => {
-            if (this.options && typeof (this.options.onRowClick) == 'function' && event.target.parentElement.attributes.index) {
+            if (this.options && isFunction(this.options.onRowClick) && event.target.parentElement.attributes.index) {
                 const rowIndex = Number(event.target.parentElement.attributes.index.value);
                 if (this.data[rowIndex]) {
                     this.options.onRowClick(this.data[rowIndex]);
@@ -47,7 +47,7 @@ class Table {
             }
             if (event.target.attributes.action) {
                 const action = event.target.attributes.action.value;
-                if (typeof (this[action]) === 'function') {
+                if (isFunction(this[action])) {
                     this[action](event.target.attributes);
                 }
             }
@@ -87,7 +87,7 @@ class Table {
 
 
     displayValue(row, col) {
-        if (typeof (col.displayValue) === 'function') {
+        if (isFunction(col.displayValue)) {
             return col.displayValue(row, col);
         }
         return row[col.key];
@@ -138,7 +138,9 @@ class Table {
     searchAndFilter(data) {
         if (this.searchValue && this.searchValue.value) {
             const regex = new RegExp(this.searchValue.value, 'i');
-            return this.data.filter(row => regex.test(row[this.searchValue.colKey]));
+            const data = this.data.filter(row => regex.test(row[this.searchValue.colKey]));
+            this.pagination.setTotalPages(data.length);
+            return data;
         }
         return data;
     }
@@ -240,7 +242,8 @@ class Table {
     renderBody() {
         this.removeInputListener('tbody input', this.onInputChanged);
         const tbody = document.createElement('tbody');
-        this.currentPageData().forEach((row, rowIndex) => {
+        const data = this.currentPageData();
+        data.forEach((row, rowIndex) => {
             const tr = createElement('tr', { 'index': this.dataIndex(rowIndex) });
             this.cols.forEach((col) => {
                 const td = this.renderCell(row, col);

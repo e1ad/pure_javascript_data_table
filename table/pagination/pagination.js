@@ -19,14 +19,14 @@ class Pagination {
     addClickListener() {
         this.target.addEventListener('click', (event) => {
             if (event.target.nodeName == 'LI') {
-                if (event.target.className.indexOf(this.PAGE_NUMBER_CLASS) > -1 && typeof (this.onClick) === 'function') {
+                if (event.target.className.indexOf(this.PAGE_NUMBER_CLASS) > -1 && isFunction(this.onClick)) {
                     const currentPage = Number(event.target.innerText) - 1;
                     this.setSelectedPage(currentPage);
                     this.onClick(currentPage);
                 }
                 if (event.target.attributes.action) {
                     const action = event.target.attributes.action.value;
-                    if (typeof (this[action]) === 'function') {
+                    if (isFunction(this[action])) {
                         this[action]();
                     }
                 }
@@ -54,7 +54,7 @@ class Pagination {
     onNav() {
         this.renderPages();
         this.setSelectedPage();
-        if (typeof (this.onClick) === 'function') {
+        if (isFunction(this.onClick)) {
             this.onClick(this.currentPage);
         }
     }
@@ -130,6 +130,12 @@ class Pagination {
         });
     }
 
+
+    setTotalPages(total, currentPage = 0) {
+        this.total = total;
+        this.renderPages();
+        this.setSelectedPage(currentPage);
+    }
 
     start(total, maxRows, onClick) {
         if (this.target && total && maxRows) {
