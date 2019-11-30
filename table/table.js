@@ -1,6 +1,5 @@
 class Table {
 
-
     constructor(target, options = {}) {
 
         this.target = isString(target) ? document.querySelector(target) : target;
@@ -19,7 +18,7 @@ class Table {
             this.addClickListener();
         }
 
-        ['onPageClick', 'onInputChanged', 'onSearchInputListener'].forEach(funName => {
+        ['onPageClick', 'onInputChanged', 'onSearchInput'].forEach(funName => {
             this[funName] = this[funName].bind(this)
         });
 
@@ -101,17 +100,16 @@ class Table {
             case 'function':
                 return col.className(row, col);
             default:
-                return ''
+                return '';
         }
     }
 
 
     sortArrowIcon(col, direction) {
-        const actionName = direction === 1 ? 'sortUp' : 'sortDown';
         const icon = direction === 1 ? 'arrow_drop_up' : 'arrow_drop_down';
         return createElement('span', {
             class: `material-icons ${col.key == this.sortByCol && this.dir == direction ? 'selected' : ''}`,
-            action: actionName,
+            action: direction === 1 ? 'sortUp' : 'sortDown',
             colKey: col.key
         }, icon);
     }
@@ -126,7 +124,7 @@ class Table {
     }
 
 
-    onSearchInputListener(event) {
+    onSearchInput(event) {
         this.currentPage = 0;
         this.pagination.setSelectedPage(this.currentPage);
         const colKey = event.target.attributes.colKey && event.target.attributes.colKey.value;
@@ -138,9 +136,9 @@ class Table {
     searchAndFilter(data) {
         if (this.searchValue && this.searchValue.value) {
             const regex = new RegExp(this.searchValue.value, 'i');
-            const data = this.data.filter(row => regex.test(row[this.searchValue.colKey]));
+            const _data = this.data.filter(row => regex.test(row[this.searchValue.colKey]));
             this.pagination.setTotalPages(data.length);
-            return data;
+            return _data;
         }
         return data;
     }
@@ -156,7 +154,7 @@ class Table {
 
 
     rederHeader() {
-        this.removeInputListener('thead input', this.onSearchInputListener);
+        this.removeInputListener(this.onSearchInputListener);
         const thead = document.createElement('thead');
         const tr = document.createElement('tr');
         const colSearchRow = document.createElement('tr');
@@ -172,14 +170,13 @@ class Table {
         thead.appendChild(colSearchRow);
         thead.appendChild(tr);
         this.table.querySelector('thead').replaceWith(thead);
-        this.addInputListener('thead input', this.onSearchInputListener);
+        this.onSearchInputListener = this.addInputListener('thead input', this.onSearchInput);
     }
 
 
     inputCell(col, value) {
         const attributs = Object.assign({}, col.input, { value, colKey: col.key });
-        const input = createElement('input', attributs);
-        return input;
+        return createElement('input', attributs);
     }
 
 
@@ -212,18 +209,15 @@ class Table {
     }
 
 
-    addInputListener(selector, func) {
-        const inputs = this.table.querySelectorAll(selector);
-        inputs.forEach(input => {
-            input.addEventListener('input', func, false);
-        });
+    removeInputListener(destoryInputListeners) {
+        forEach(destoryInputListeners, destoryInputListener => destoryInputListener());
     }
 
 
-    removeInputListener(selector, func) {
+    addInputListener(selector, func) {
         const inputs = this.table.querySelectorAll(selector);
-        inputs.forEach(input => {
-            input.removeEventListener('input', func, false);
+        return [...inputs].map(input => {
+            return createEventListener(input, 'input', func);
         });
     }
 
@@ -240,7 +234,7 @@ class Table {
 
 
     renderBody() {
-        this.removeInputListener('tbody input', this.onInputChanged);
+        this.removeInputListener(this.destoryInputListeners);
         const tbody = document.createElement('tbody');
         const data = this.currentPageData();
         data.forEach((row, rowIndex) => {
@@ -252,7 +246,7 @@ class Table {
             tbody.appendChild(tr);
         });
         this.table.querySelector('tbody').replaceWith(tbody);
-        this.addInputListener('tbody input', this.onInputChanged);
+        this.destoryInputListeners = this.addInputListener('tbody input', this.onInputChanged);
     }
 
 
@@ -264,7 +258,7 @@ class Table {
 
     start(data, cols) {
         if (this.target) {
-            this.target.setAttribute('class', 'data-table');
+            this.target.setAttribute('class', Table.TABLE_CLASS_NAME);
             this.data = data;
             this.cols = cols;
             setTimeout(() => {
@@ -276,5 +270,7 @@ class Table {
         }
     }
 
-
 }
+
+
+Table.TABLE_CLASS_NAME = 'data-table'

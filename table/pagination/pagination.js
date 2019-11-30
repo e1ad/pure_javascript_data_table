@@ -1,10 +1,6 @@
 class Pagination {
 
     constructor(target) {
-        this.SELECTED_ATTR = 'selected';
-        this.PAGE_NUMBER_CLASS = 'page-number';
-
-
         if (target) {
             this.target = target;
             this.maxPages = 12;
@@ -19,7 +15,7 @@ class Pagination {
     addClickListener() {
         this.target.addEventListener('click', (event) => {
             if (event.target.nodeName == 'LI') {
-                if (event.target.className.indexOf(this.PAGE_NUMBER_CLASS) > -1 && isFunction(this.onClick)) {
+                if (event.target.className.indexOf(Pagination.PAGE_NUMBER_CLASS) > -1 && isFunction(this.onClick)) {
                     const currentPage = Number(event.target.innerText) - 1;
                     this.setSelectedPage(currentPage);
                     this.onClick(currentPage);
@@ -106,7 +102,7 @@ class Pagination {
         const ul = document.createElement('ul');
         this.addPreviousNav(ul)
         for (let i = min; i < max; i++) {
-            const li = createElement('li', { class: this.PAGE_NUMBER_CLASS }, i + 1);
+            const li = createElement('li', { class: Pagination.PAGE_NUMBER_CLASS }, i + 1);
             ul.appendChild(li);
         }
         this.addNextNav(ul)
@@ -122,10 +118,10 @@ class Pagination {
         lis.forEach(li => {
             const pageNumber = Number(li.innerText) - 1;
             if (pageNumber == this.currentPage) {
-                li.classList.add(this.SELECTED_ATTR);
+                li.classList.add(Pagination.SELECTED_ATTR);
             }
-            else if (li.className.indexOf(this.SELECTED_ATTR) > -1) {
-                li.classList.remove(this.SELECTED_ATTR);
+            else if (li.className.indexOf(Pagination.SELECTED_ATTR) > -1) {
+                li.classList.remove(Pagination.SELECTED_ATTR);
             }
         });
     }
@@ -149,3 +145,7 @@ class Pagination {
 
 
 }
+
+
+Pagination.SELECTED_ATTR = 'selected';
+Pagination.PAGE_NUMBER_CLASS = 'page-number';

@@ -25,3 +25,17 @@ const isFunction = (func) => {
 const isString = (func) => {
     return typeof (func) === 'string';
 };
+
+const createEventListener = (element, event, callback) => {
+    element.addEventListener(event, callback, false);
+    return () => {
+        element.removeEventListener(event, callback, false);
+    };
+};
+
+
+const forEach = (array, callback) => {
+    if (Array.isArray(array) && array.length) {
+        array.forEach(callback);
+    }
+};
