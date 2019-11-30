@@ -137,7 +137,7 @@ class Table {
         if (this.searchValue && this.searchValue.value) {
             const regex = new RegExp(this.searchValue.value, 'i');
             const _data = this.data.filter(row => regex.test(row[this.searchValue.colKey]));
-            this.pagination.setTotalPages(data.length);
+            this.pagination.setTotalPages(_data.length);
             return _data;
         }
         return data;
