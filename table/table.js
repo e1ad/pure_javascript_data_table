@@ -33,7 +33,7 @@ class Table {
         else if (tableHeight) {
             return Math.floor(tableHeight / Table.DEFAULT_ROW_HEIGHT) - moreRows;
         }
-        return Table.DEFAULT_MAX_ROW;
+        return Table.DEFAULT_MAX_ROWS;
     }
 
 
@@ -291,5 +291,5 @@ class Table {
 Table.TABLE_CLASS_NAME = 'data-table'
 Table.SORT_UP_ICON = 'arrow_drop_up';
 Table.SORT_DOWN_ICON = 'arrow_drop_down';
-Table.DEFAULT_MAX_ROW = 10;
+Table.DEFAULT_MAX_ROWS = 10;
 Table.DEFAULT_ROW_HEIGHT = 32;
