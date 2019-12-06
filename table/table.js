@@ -137,7 +137,7 @@ class Table {
         if (this.searchValue && this.searchValue.value) {
             const regex = new RegExp(this.searchValue.value, 'i');
             const _data = this.data.filter(row => regex.test(row[this.searchValue.colKey]));
-            this.pagination.setTotalPages(_data.length);
+            this.pagination.setTotalPages(_data.length, this.currentPage);
             return _data;
         }
         return data;
@@ -256,11 +256,18 @@ class Table {
     }
 
 
+    reset() {
+        this.searchValue = '';
+        this.currentPage = 0;
+    }
+
+
     start(data, cols) {
         if (this.target) {
             this.target.setAttribute('class', Table.TABLE_CLASS_NAME);
             this.data = data;
             this.cols = cols;
+            this.reset();
             setTimeout(() => {
                 this.maxRows = this.getMaxRows();
                 this.pagination.start(this.data.length, this.maxRows, this.onPageClick);
