@@ -1,6 +1,8 @@
 class Pagination {
 
     constructor(target) {
+        this.tableClickDestory = noop;
+
         if (target) {
             this.target = target;
             this.maxPages = 12;
@@ -13,7 +15,7 @@ class Pagination {
 
 
     addClickListener() {
-        this.target.addEventListener('click', (event) => {
+        this.tableClickDestory = createEventListener(this.target, 'click', (event) => {
             if (event.target.nodeName == 'LI') {
                 if (event.target.className.indexOf(Pagination.PAGE_NUMBER_CLASS) > -1 && isFunction(this.onClick)) {
                     const currentPage = Number(event.target.innerText) - 1;
@@ -77,7 +79,7 @@ class Pagination {
 
 
     createNavIcon(action) {
-        const icon = action === 'previous' ? 'navigate_before' : 'navigate_next';
+        const icon = action === 'previous' ? Pagination.NAV_PREVIOUS_ICON : Pagination.NAV_NEXT_ICON;
         return createElement('li', { action: action, class: 'material-icons' }, icon);
     }
 
@@ -143,9 +145,15 @@ class Pagination {
         }
     }
 
+    destroy() {
+        this.tableClickDestory();
+    }
+
 
 }
 
 
 Pagination.SELECTED_ATTR = 'selected';
 Pagination.PAGE_NUMBER_CLASS = 'page-number';
+Pagination.NAV_NEXT_ICON = 'navigate_next';
+Pagination.NAV_PREVIOUS_ICON = 'navigate_before';

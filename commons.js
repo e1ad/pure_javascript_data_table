@@ -17,6 +17,7 @@ const createElement = (tag, attributs = {}, children) => {
     return element;
 };
 
+
 const isFunction = (func) => {
     return typeof (func) === 'function';
 };
@@ -25,6 +26,7 @@ const isFunction = (func) => {
 const isString = (func) => {
     return typeof (func) === 'string';
 };
+
 
 const createEventListener = (element, event, callback) => {
     element.addEventListener(event, callback, false);
@@ -39,3 +41,6 @@ const forEach = (array, callback) => {
         array.forEach(callback);
     }
 };
+
+
+const noop = () => (null);

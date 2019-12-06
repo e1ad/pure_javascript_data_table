@@ -5,7 +5,7 @@ class Table {
         this.target = isString(target) ? document.querySelector(target) : target;
         this.options = options;
         this.currentPage = 0;
-        this.defaultRowHeight = 32;
+        this.tableClickDestory = noop;
 
         if (this.target) {
             this.table = document.createElement('table');
@@ -26,18 +26,19 @@ class Table {
 
     getMaxRows() {
         const tableHeight = this.target.getBoundingClientRect().height;
+        const moreRows = 2; //header and search rows
         if (this.options.maxRows) {
             return this.options.maxRows;
         }
         else if (tableHeight) {
-            return Math.floor(tableHeight / this.defaultRowHeight);
+            return Math.floor(tableHeight / Table.DEFAULT_ROW_HEIGHT) - moreRows;
         }
-        return 10;
+        return Table.DEFAULT_MAX_ROW;
     }
 
 
     addClickListener() {
-        this.table.addEventListener('click', event => {
+        this.tableClickDestory = createEventListener(this.table, 'click', event => {
             if (this.options && isFunction(this.options.onRowClick) && event.target.parentElement.attributes.index) {
                 const rowIndex = Number(event.target.parentElement.attributes.index.value);
                 if (this.data[rowIndex]) {
@@ -106,7 +107,7 @@ class Table {
 
 
     sortArrowIcon(col, direction) {
-        const icon = direction === 1 ? 'arrow_drop_up' : 'arrow_drop_down';
+        const icon = direction === 1 ? Table.SORT_UP_ICON : Table.SORT_DOWN_ICON;
         return createElement('span', {
             class: `material-icons ${col.key == this.sortByCol && this.dir == direction ? 'selected' : ''}`,
             action: direction === 1 ? 'sortUp' : 'sortDown',
@@ -277,7 +278,18 @@ class Table {
         }
     }
 
+    destroy() {
+        this.tableClickDestory();
+        this.removeInputListener(this.onSearchInputListener);
+        this.removeInputListener(this.destoryInputListeners);
+        this.pagination.destroy();
+    }
+
 }
 
 
 Table.TABLE_CLASS_NAME = 'data-table'
+Table.SORT_UP_ICON = 'arrow_drop_up';
+Table.SORT_DOWN_ICON = 'arrow_drop_down';
+Table.DEFAULT_MAX_ROW = 10;
+Table.DEFAULT_ROW_HEIGHT = 32;
