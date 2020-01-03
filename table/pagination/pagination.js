@@ -17,17 +17,20 @@ class Pagination {
     addClickListener() {
         this.tableClickDestory = createEventListener(this.target, 'click', (event) => {
             if (event.target.nodeName == 'LI') {
+
                 if (event.target.className.indexOf(Pagination.PAGE_NUMBER_CLASS) > -1 && isFunction(this.onClick)) {
                     const currentPage = Number(event.target.innerText) - 1;
                     this.setSelectedPage(currentPage);
                     this.onClick(currentPage);
                 }
+
                 if (event.target.attributes.action) {
                     const action = event.target.attributes.action.value;
                     if (isFunction(this[action])) {
                         this[action]();
                     }
                 }
+
             }
         });
     }
@@ -101,7 +104,7 @@ class Pagination {
 
     renderPages() {
         const { min, max } = this.minAndMax();
-        const ul = document.createElement('ul');
+        const ul = createElement('ul');
         this.addPreviousNav(ul)
         for (let i = min; i < max; i++) {
             const li = createElement('li', { class: Pagination.PAGE_NUMBER_CLASS }, i + 1);
@@ -119,12 +122,15 @@ class Pagination {
         const lis = this.target.querySelectorAll('ul > li');
         lis.forEach(li => {
             const pageNumber = Number(li.innerText) - 1;
+
             if (pageNumber == this.currentPage) {
                 li.classList.add(Pagination.SELECTED_ATTR);
             }
+
             else if (li.className.indexOf(Pagination.SELECTED_ATTR) > -1) {
                 li.classList.remove(Pagination.SELECTED_ATTR);
             }
+
         });
     }
 

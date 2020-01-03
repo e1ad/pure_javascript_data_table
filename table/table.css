@@ -3,16 +3,29 @@
     height: 400px;
 }
 
- table{
-    border-collapse: collapse;
+.table{
     width: 100%;
 }
 
-.data-table th{
+.data-table .tobdy{
+    flex: 1;
+    flex-direction: column;
+}
+
+.data-table .tr{
+    display: flex;
+}
+
+.data-table .td,
+.data-table .th{
+    flex: 1;
+}
+
+.data-table .th{
     padding: 5px 30px 5px 35px;
 }
 
-.data-table th > .sort{
+.data-table .th > .sort{
  position: absolute;
  top: 1px;
  right: 0;
@@ -22,7 +35,7 @@
     margin-top:-3px;
 }
 
-.data-table th > .sort > span{
+.data-table .th > .sort > span{
     display: block;
     z-index: 2;
     cursor: pointer;
@@ -31,22 +44,22 @@
     line-height: 14px;
 }
 
-.data-table th > .sort > span.selected{
+.data-table .th > .sort > span.selected{
     opacity: 1;
 }
 
-.data-table th,
-.data-table td{
+.data-table .th,
+.data-table .td{
     position: relative;
     text-align: center;
     border: solid 1px #d9dcde;
 }
 
-.data-table td{
+.data-table .td{
     padding: 5px;
 }
 
-.data-table footer {
+.data-table .footer {
     margin-top: 5px;
 }
 

@@ -9,7 +9,8 @@ for (let i = 0; i <= 1000; i++) {
 
 
 const replaceData = [];
-for (let i = 0; i <= 1000; i++) {
+
+for (let i = 0; i <= 10; i++) {
     replaceData.push({
         name: 'noy' + i,
         age: i
@@ -21,8 +22,7 @@ const cols = [
     {
         header: 'Name',
         key: 'name',
-        startSort: true,
-        className: function (row, col) {
+        className: (row, col) => {
             return row[col.key] == 'elad1' ? 'test' : '';
         }
     },
@@ -44,10 +44,13 @@ const options = {
     onRowClick: (row) => {
         console.log(row);
     },
+    onInputChange: (row) => {
+        console.log(row);
+    }
 }
 
 
-document.addEventListener('DOMContentLoaded', function (event) {
+document.addEventListener('DOMContentLoaded', (event) => {
 
 
     table = new Table('#dataTable', options);
@@ -59,7 +62,5 @@ document.addEventListener('DOMContentLoaded', function (event) {
 
 
 const replace = () => {
-    console.log('replace');
-    console.log(replaceData)
     table.start(replaceData, cols);
 }

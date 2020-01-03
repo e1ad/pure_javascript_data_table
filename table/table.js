@@ -7,16 +7,18 @@ class Table {
         this.currentPage = 0;
         this.tableClickDestory = noop;
 
-        if (this.target) {
-            this.table = document.createElement('table');
-            this.footer = document.createElement('footer')
-            this.table.appendChild(document.createElement('thead'));
-            this.table.appendChild(document.createElement('tbody'));
+        if (isElement(this.target)) {
+            this.table = createElement('div', { class: 'table' }, [
+                createElement('thead', { class: 'thead' }),
+                createElement('div', { class: 'tbody' })
+            ]);
+            this.footer = createElement('div', { class: 'footer' })
             this.target.appendChild(this.table);
             this.target.appendChild(this.footer)
             this.pagination = new Pagination(this.footer);
             this.addClickListener();
         }
+
 
         ['onPageClick', 'onInputChanged', 'onSearchInput'].forEach(funName => {
             this[funName] = this[funName].bind(this)
@@ -33,20 +35,25 @@ class Table {
         else if (tableHeight) {
             return Math.floor(tableHeight / Table.DEFAULT_ROW_HEIGHT) - moreRows;
         }
+
         return Table.DEFAULT_MAX_ROWS;
     }
 
 
     addClickListener() {
         this.tableClickDestory = createEventListener(this.table, 'click', event => {
-            if (this.options && isFunction(this.options.onRowClick) && event.target.parentElement.attributes.index) {
-                const rowIndex = Number(event.target.parentElement.attributes.index.value);
+
+            const indexAttr = event.target.parentElement.attributes.index;
+            if (this.options && isFunction(this.options.onRowClick) && indexAttr) {
+                const rowIndex = Number(indexAttr.value);
                 if (this.data[rowIndex]) {
                     this.options.onRowClick(this.data[rowIndex]);
                 }
             }
-            if (event.target.attributes.action) {
-                const action = event.target.attributes.action.value;
+
+            const actionAttr = event.target.attributes.action;
+            if (actionAttr) {
+                const action = actionAttr.value;
                 if (isFunction(this[action])) {
                     this[action](event.target.attributes);
                 }
@@ -60,16 +67,21 @@ class Table {
     }
 
 
+    getSortCallback(col) {
+        if (typeof (col.sort) == 'object' && col.sort.callBack) {
+            return col.sort.callBack;
+        }
+
+        return (a, b) => a[col.key] > b[col.key] ? this.dir : -1 * this.dir
+    }
+
+
     sort(dir, colKey) {
         if (this.dir != dir || this.sortByCol != colKey) {
             const col = this.findColByKey(colKey);
             this.sortByCol = colKey;
             this.dir = dir;
-            if (typeof (col.sort) == 'object' && col.sort.callBack) {
-                this.data.sort(col.sort.callBack);
-            } else {
-                this.data.sort((a, b) => a[colKey] > b[colKey] ? dir : -1 * dir);
-            }
+            this.data.sort(this.getSortCallback(col));
             this.rederHeader();
             this.renderBody();
         }
@@ -90,6 +102,7 @@ class Table {
         if (isFunction(col.displayValue)) {
             return col.displayValue(row, col);
         }
+        
         return row[col.key];
     }
 
@@ -115,13 +128,13 @@ class Table {
         }, icon);
     }
 
+
     addSortIcons(col) {
-        const spanA2z = this.sortArrowIcon(col, 1);
-        const spanZ2a = this.sortArrowIcon(col, -1);
-        const divContainer = createElement('div', { class: 'sort' });
-        divContainer.appendChild(spanA2z);
-        divContainer.appendChild(spanZ2a);
-        return divContainer;
+        return createElement('div', { class: 'sort' }, [
+            this.sortArrowIcon(col, 1),
+            this.sortArrowIcon(col, -1)
+        ]);
+
     }
 
 
@@ -146,7 +159,7 @@ class Table {
 
 
     colSearchHeader(tr, col) {
-        const td = document.createElement('td');
+        const td = createElement('div', { class: 'td' });
         const input = document.createElement('input');
         input.setAttribute('colKey', col.key);
         td.appendChild(input)
@@ -156,22 +169,23 @@ class Table {
 
     rederHeader() {
         this.removeInputListener(this.onSearchInputListener);
-        const thead = document.createElement('thead');
-        const tr = document.createElement('tr');
-        const colSearchRow = document.createElement('tr');
-        this.cols.forEach(col => {
-            this.colSearchHeader(colSearchRow, col)
-            const th = createElement('th', {}, col.header);
-            if (col.sort === undefined || col.sort === true) {
-                const addSortIcons = this.addSortIcons(col);
-                th.appendChild(addSortIcons);
-            }
-            tr.appendChild(th);
+        const colSearchRow = createElement('div', { class: 'tr' });
+
+        const ths = this.cols.map(col => {
+            this.colSearchHeader(colSearchRow, col);
+            const addSortIcons = (col.sort === undefined || col.sort === true) ? this.addSortIcons(col) : undefined;
+
+            return createElement('div', { class: 'th' }, [col.header, addSortIcons]);
         });
-        thead.appendChild(colSearchRow);
-        thead.appendChild(tr);
-        this.table.querySelector('thead').replaceWith(thead);
-        this.onSearchInputListener = this.addInputListener('thead input', this.onSearchInput);
+
+        const tr = createElement('div', { class: 'tr' }, ths);
+        const thead = createElement('div', { class: 'thead' }, [
+            colSearchRow,
+            tr
+        ]);
+
+        this.table.querySelector('.thead').replaceWith(thead);
+        this.onSearchInputListener = this.addInputListener('.thead input', this.onSearchInput);
     }
 
 
@@ -182,30 +196,31 @@ class Table {
 
 
     renderCell(row, col) {
-        const td = document.createElement('td');
         const className = this.className(row, col);
-        if (className) {
-            td.setAttribute('class', className);
-        }
+        const td = createElement('div', { class: `td ${className ? className : ''}` });
         const value = this.displayValue(row, col);
-        let cellText;
-        if (typeof (col.input) == 'object') {
-            cellText = this.inputCell(col, value);
-        }
-        else {
-            cellText = document.createTextNode(value);
-        }
+        const cellText = typeof (col.input) == 'object' ?
+            this.inputCell(col, value) :
+            document.createTextNode(value);
+
         td.appendChild(cellText);
         return td;
     }
 
 
     onInputChanged(event) {
-        const index = Number(event.target.parentElement.parentElement.attributes.index && event.target.parentElement.parentElement.attributes.index.value);
-        const colKey = event.target.attributes.colKey && event.target.attributes.colKey.value;
-        if (this.data[index]) {
-            this.data[index][colKey] = event.target.value;
-            event.target.setAttribute('value', event.target.value);
+        const indexAttr = event.target.parentElement.parentElement.attributes.index;
+        const index = Number(indexAttr && indexAttr.value);
+        const colKeyAttr = event.target.attributes.colKey
+        const value = event.target.value;
+        const row = this.data[index];
+
+        if (row) {
+            row[colKeyAttr.value] = value;
+            event.target.setAttribute('value', value);
+            if (isFunction(this.options.onInputChange)) {
+                this.options.onInputChange(row);
+            }
         };
     }
 
@@ -236,18 +251,16 @@ class Table {
 
     renderBody() {
         this.removeInputListener(this.destoryInputListeners);
-        const tbody = document.createElement('tbody');
         const data = this.currentPageData();
-        data.forEach((row, rowIndex) => {
-            const tr = createElement('tr', { 'index': this.dataIndex(rowIndex) });
-            this.cols.forEach((col) => {
-                const td = this.renderCell(row, col);
-                tr.appendChild(td);
-            })
-            tbody.appendChild(tr);
+
+        const trs = data.map((row, rowIndex) => {
+            const tds = this.cols.map(col => this.renderCell(row, col));
+            return createElement('div', { class: 'tr', index: this.dataIndex(rowIndex) }, tds);
         });
-        this.table.querySelector('tbody').replaceWith(tbody);
-        this.destoryInputListeners = this.addInputListener('tbody input', this.onInputChanged);
+
+        const tbody = createElement('div', { class: 'tbody' }, trs);
+        this.table.querySelector('.tbody').replaceWith(tbody);
+        this.destoryInputListeners = this.addInputListener('.tbody input', this.onInputChanged);
     }
 
 
@@ -263,18 +276,21 @@ class Table {
     }
 
 
+    onDomReady() {
+        this.maxRows = this.getMaxRows();
+        this.pagination.start(this.data.length, this.maxRows, this.onPageClick);
+        this.rederHeader();
+        this.renderBody();
+    }
+
+
     start(data, cols) {
-        if (this.target) {
+        if (isElement(this.target)) {
             this.target.setAttribute('class', Table.TABLE_CLASS_NAME);
             this.data = data;
             this.cols = cols;
             this.reset();
-            setTimeout(() => {
-                this.maxRows = this.getMaxRows();
-                this.pagination.start(this.data.length, this.maxRows, this.onPageClick);
-                this.rederHeader();
-                this.renderBody();
-            }, 0);
+            setTimeout(this.onDomReady.bind(this), 0);
         }
     }
 
