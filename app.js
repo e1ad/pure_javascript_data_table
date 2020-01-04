@@ -24,7 +24,8 @@ const cols = [
         key: 'name',
         className: (row, col) => {
             return row[col.key] == 'elad1' ? 'test' : '';
-        }
+        },
+        sort: true
     },
     {
         header: 'Age',
@@ -41,8 +42,9 @@ let table;
 
 
 const options = {
-    onRowClick: (row) => {
-        console.log(row);
+    searchFields: true,
+    onRowClick: (row, event) => {
+        console.log(row, event);
     },
     onInputChange: (row) => {
         console.log(row);

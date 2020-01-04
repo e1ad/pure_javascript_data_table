@@ -12,6 +12,12 @@
     flex-direction: column;
 }
 
+.data-table .tbody .td  input{
+    border: none;
+    border-bottom: solid 1px;
+    outline: none;
+}
+
 .data-table .tr{
     display: flex;
 }
@@ -62,5 +68,3 @@
 .data-table .footer {
     margin-top: 5px;
 }
-
-

@@ -74,10 +74,11 @@ class Pagination {
     minAndMax() {
         const maxPages = this.getMaxPages;
         const stackPage = Math.ceil((this.currentPage + 1) / maxPages) - 1;
-        const min = stackPage < 0 ? 0 : stackPage * maxPages;
-        let max = (stackPage + 1) * maxPages;
-        max = max < this.pages ? max : this.pages;
-        return { min, max };
+        const max = (stackPage + 1) * maxPages;
+        return {
+            min: stackPage < 0 ? 0 : stackPage * maxPages,
+            max: max < this.pages ? max : this.pages
+        };
     }
 
 

@@ -12,6 +12,7 @@ class Table {
                 createElement('thead', { class: 'thead' }),
                 createElement('div', { class: 'tbody' })
             ]);
+
             this.footer = createElement('div', { class: 'footer' })
             this.target.appendChild(this.table);
             this.target.appendChild(this.footer)
@@ -47,7 +48,7 @@ class Table {
             if (this.options && isFunction(this.options.onRowClick) && indexAttr) {
                 const rowIndex = Number(indexAttr.value);
                 if (this.data[rowIndex]) {
-                    this.options.onRowClick(this.data[rowIndex]);
+                    this.options.onRowClick(this.data[rowIndex], event);
                 }
             }
 
@@ -102,7 +103,7 @@ class Table {
         if (isFunction(col.displayValue)) {
             return col.displayValue(row, col);
         }
-        
+
         return row[col.key];
     }
 
@@ -149,32 +150,46 @@ class Table {
 
     searchAndFilter(data) {
         if (this.searchValue && this.searchValue.value) {
-            const regex = new RegExp(this.searchValue.value, 'i');
-            const _data = this.data.filter(row => regex.test(row[this.searchValue.colKey]));
-            this.pagination.setTotalPages(_data.length, this.currentPage);
-            return _data;
+            const value = this.searchValue.value.toLowerCase();
+            const filteredData = this.data.filter(row => String(row[this.searchValue.colKey]).toLowerCase().includes(value));
+            this.pagination.setTotalPages(filteredData.length, this.currentPage);
+
+            return filteredData;
         }
+
         return data;
     }
 
 
     colSearchHeader(tr, col) {
-        const td = createElement('div', { class: 'td' });
-        const input = document.createElement('input');
-        input.setAttribute('colKey', col.key);
-        td.appendChild(input)
+        const td = createElement('div', { class: 'td' }, [
+            createElement('input', { colKey: col.key })
+        ]);
+
         tr.appendChild(td);
+    }
+
+    
+    isSortable(col) {
+        return col.sort === undefined || col.sort === true;
     }
 
 
     rederHeader() {
-        this.removeInputListener(this.onSearchInputListener);
-        const colSearchRow = createElement('div', { class: 'tr' });
+        let colSearchRow;
+
+        if (this.options.searchFields) {
+            this.removeInputListener(this.onSearchInputListener);
+            colSearchRow = createElement('div', { class: 'tr' });
+        }
 
         const ths = this.cols.map(col => {
-            this.colSearchHeader(colSearchRow, col);
-            const addSortIcons = (col.sort === undefined || col.sort === true) ? this.addSortIcons(col) : undefined;
 
+            if (this.options.searchFields) {
+                this.colSearchHeader(colSearchRow, col);
+            }
+
+            const addSortIcons = this.isSortable(col) ? this.addSortIcons(col) : undefined;
             return createElement('div', { class: 'th' }, [col.header, addSortIcons]);
         });
 
@@ -185,7 +200,9 @@ class Table {
         ]);
 
         this.table.querySelector('.thead').replaceWith(thead);
-        this.onSearchInputListener = this.addInputListener('.thead input', this.onSearchInput);
+        if (this.options.searchFields) {
+            this.onSearchInputListener = this.addInputListener('.thead input', this.onSearchInput);
+        }
     }
 
 
@@ -195,15 +212,23 @@ class Table {
     }
 
 
+    cellContent(row, col) {
+        const value = this.displayValue(row, col);
+
+        if (typeof (col.input) == 'object') {
+            return this.inputCell(col, value);
+        }
+
+        return document.createTextNode(value);
+    }
+
+
     renderCell(row, col) {
         const className = this.className(row, col);
+        const cellContent = this.cellContent(row, col);
         const td = createElement('div', { class: `td ${className ? className : ''}` });
-        const value = this.displayValue(row, col);
-        const cellText = typeof (col.input) == 'object' ?
-            this.inputCell(col, value) :
-            document.createTextNode(value);
+        td.appendChild(cellContent);
 
-        td.appendChild(cellText);
         return td;
     }
 
