@@ -1,4 +1,6 @@
-class Pagination {
+import { createElement, isFunction, noop, createEventListener } from './../../commons.js';
+
+export class Pagination {
 
     constructor(target) {
         this.tableClickDestory = noop;

@@ -77,4 +77,31 @@
 .data-table .footer {
   margin-top: 5px;
 }
-/*# sourceMappingURL=table.css.map */
+
+.pagination ul {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.pagination li {
+  padding: 5px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.pagination li.selected {
+  font-weight: 700;
+}
+/*# sourceMappingURL=main.css.map */

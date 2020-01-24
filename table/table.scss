@@ -1,0 +1,73 @@
+.data-table{
+    width: 500px;
+    height: 400px;
+
+    .table{
+        width: 100%;
+    }
+    
+    .tobdy{
+        flex: 1;
+        flex-direction: column;
+    }
+    
+    .tbody .td  input{
+        border: none;
+        border-bottom: solid 1px;
+        outline: none;
+    }
+    
+    .tr{
+        display: flex;
+    }
+    
+    .td,
+    .th{
+        flex: 1;
+    }
+    
+    .th{
+        padding: 5px 30px 5px 35px;
+    }
+    
+    .th > .sort{
+     position: absolute;
+     top: 1px;
+     right: 0;
+    }
+    
+    [action="sortDown"]{
+        margin-top:-3px;
+    }
+    
+    .th > .sort > span{
+        display: block;
+        z-index: 2;
+        cursor: pointer;
+        font-size: 21px;
+        opacity: 0.5;
+        line-height: 14px;
+    }
+    
+    .th > .sort > span.selected{
+        opacity: 1;
+    }
+    
+    .th,
+    .td{
+        position: relative;
+        text-align: center;
+        border: solid 1px #d9dcde;
+    }
+    
+   .td{
+        padding: 5px;
+    }
+    
+    .footer {
+        margin-top: 5px;
+    }
+
+
+}
+

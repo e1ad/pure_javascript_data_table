@@ -1,4 +1,4 @@
-const createElement = (elementName, attributs = {}, children) => {
+export const createElement = (elementName, attributs = {}, children) => {
     const element = document.createElement(elementName);
 
     for (let key in attributs) {
@@ -25,25 +25,25 @@ const appendChild = (child, element) => {
 }
 
 
-const isFunction = (value) => {
+export const isFunction = (value) => {
     return typeof (value) === 'function';
 };
 
 
-const isString = (value) => {
+export const isString = (value) => {
     return typeof (value) === 'string';
 };
 
-const isNumber = (value) => {
+export const isNumber = (value) => {
     return typeof (value) === 'number';
 };
 
-const isElement = (value) => {
+export const isElement = (value) => {
     return value instanceof Element;
 }
 
 
-const createEventListener = (element, event, callback) => {
+export const createEventListener = (element, event, callback) => {
     element.addEventListener(event, callback, false);
     return () => {
         element.removeEventListener(event, callback, false);
@@ -51,11 +51,11 @@ const createEventListener = (element, event, callback) => {
 };
 
 
-const forEach = (array, callback) => {
+export const forEach = (array, callback) => {
     if (Array.isArray(array) && array.length) {
         array.forEach(callback);
     }
 };
 
 
-const noop = () => (null);
+export const noop = () => (null);

@@ -1,4 +1,7 @@
-class Table {
+import { createElement, isFunction, isString, isElement, createEventListener, forEach, noop } from './../commons.js';
+import { Pagination } from './pagination/pagination.js'
+
+export class Table {
 
     constructor(target, options = {}) {
 
@@ -169,7 +172,7 @@ class Table {
         tr.appendChild(td);
     }
 
-    
+
     isSortable(col) {
         return col.sort === undefined || col.sort === true;
     }
