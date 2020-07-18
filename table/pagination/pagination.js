@@ -1,6 +1,11 @@
-import { createElement, isFunction, noop, createEventListener } from './../../commons.js';
+import {createElement, isFunction, noop, createEventListener, isNumber} from './../../commons.js';
 
 export class Pagination {
+
+    static SELECTED_ATTR = 'selected';
+    static PAGE_NUMBER_CLASS = 'page-number';
+    static NAV_NEXT_ICON = 'navigate_next';
+    static NAV_PREVIOUS_ICON = 'navigate_before';
 
     constructor(target) {
         this.tableClickDestory = noop;
@@ -18,7 +23,7 @@ export class Pagination {
 
     addClickListener() {
         this.tableClickDestory = createEventListener(this.target, 'click', (event) => {
-            if (event.target.nodeName == 'LI') {
+            if (event.target.nodeName === 'LI') {
 
                 if (event.target.className.indexOf(Pagination.PAGE_NUMBER_CLASS) > -1 && isFunction(this.onClick)) {
                     const currentPage = Number(event.target.innerText) - 1;
@@ -86,7 +91,7 @@ export class Pagination {
 
     createNavIcon(action) {
         const icon = action === 'previous' ? Pagination.NAV_PREVIOUS_ICON : Pagination.NAV_NEXT_ICON;
-        return createElement('li', { action: action, class: 'material-icons' }, icon);
+        return createElement('li', {action: action, class: 'material-icons'}, icon);
     }
 
     addPreviousNav(ul) {
@@ -106,11 +111,11 @@ export class Pagination {
 
 
     renderPages() {
-        const { min, max } = this.minAndMax();
+        const {min, max} = this.minAndMax();
         const ul = createElement('ul');
         this.addPreviousNav(ul)
         for (let i = min; i < max; i++) {
-            const li = createElement('li', { class: Pagination.PAGE_NUMBER_CLASS }, i + 1);
+            const li = createElement('li', {class: Pagination.PAGE_NUMBER_CLASS}, i + 1);
             ul.appendChild(li);
         }
         this.addNextNav(ul)
@@ -119,18 +124,16 @@ export class Pagination {
 
 
     setSelectedPage(currentPage) {
-        if (typeof (currentPage) === 'number') {
+        if (isNumber(currentPage)) {
             this.currentPage = currentPage;
         }
-        const lis = this.target.querySelectorAll('ul > li');
-        lis.forEach(li => {
+
+        this.target.querySelectorAll('ul > li').forEach(li => {
             const pageNumber = Number(li.innerText) - 1;
 
-            if (pageNumber == this.currentPage) {
+            if (pageNumber === this.currentPage) {
                 li.classList.add(Pagination.SELECTED_ATTR);
-            }
-
-            else if (li.className.indexOf(Pagination.SELECTED_ATTR) > -1) {
+            } else if (li.className.indexOf(Pagination.SELECTED_ATTR) > -1) {
                 li.classList.remove(Pagination.SELECTED_ATTR);
             }
 
@@ -158,11 +161,4 @@ export class Pagination {
         this.tableClickDestory();
     }
 
-
 }
-
-
-Pagination.SELECTED_ATTR = 'selected';
-Pagination.PAGE_NUMBER_CLASS = 'page-number';
-Pagination.NAV_NEXT_ICON = 'navigate_next';
-Pagination.NAV_PREVIOUS_ICON = 'navigate_before';

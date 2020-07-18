@@ -1,7 +1,22 @@
-import { createElement, isFunction, isString, isElement, createEventListener, forEach, noop } from './../commons.js';
-import { Pagination } from './pagination/pagination.js'
+import {
+    createElement,
+    isFunction,
+    isString,
+    isElement,
+    createEventListener,
+    forEach,
+    noop,
+    bindAll
+} from './../commons.js';
+import {Pagination} from './pagination/pagination.js'
 
 export class Table {
+
+    static TABLE_CLASS_NAME = 'data-table'
+    static SORT_UP_ICON = 'arrow_drop_up';
+    static SORT_DOWN_ICON = 'arrow_drop_down';
+    static DEFAULT_MAX_ROWS = 10;
+    static DEFAULT_ROW_HEIGHT = 32;
 
     constructor(target, options = {}) {
 
@@ -11,23 +26,19 @@ export class Table {
         this.tableClickDestory = noop;
 
         if (isElement(this.target)) {
-            this.table = createElement('div', { class: 'table' }, [
-                createElement('thead', { class: 'thead' }),
-                createElement('div', { class: 'tbody' })
+            this.table = createElement('div', {class: 'table'}, [
+                createElement('thead', {class: 'thead'}),
+                createElement('div', {class: 'tbody'})
             ]);
 
-            this.footer = createElement('div', { class: 'footer' })
+            this.footer = createElement('div', {class: 'footer'})
             this.target.appendChild(this.table);
             this.target.appendChild(this.footer)
             this.pagination = new Pagination(this.footer);
             this.addClickListener();
         }
 
-
-        ['onPageClick', 'onInputChanged', 'onSearchInput'].forEach(funName => {
-            this[funName] = this[funName].bind(this)
-        });
-
+        bindAll(['onPageClick', 'onInputChanged', 'onSearchInput'], this);
     }
 
     getMaxRows() {
@@ -35,8 +46,7 @@ export class Table {
         const moreRows = 2; //header and search rows
         if (this.options.maxRows) {
             return this.options.maxRows;
-        }
-        else if (tableHeight) {
+        } else if (tableHeight) {
             return Math.floor(tableHeight / Table.DEFAULT_ROW_HEIGHT) - moreRows;
         }
 
@@ -72,7 +82,7 @@ export class Table {
 
 
     getSortCallback(col) {
-        if (typeof (col.sort) == 'object' && col.sort.callBack) {
+        if (typeof (col.sort) === 'object' && col.sort.callBack) {
             return col.sort.callBack;
         }
 
@@ -81,7 +91,7 @@ export class Table {
 
 
     sort(dir, colKey) {
-        if (this.dir != dir || this.sortByCol != colKey) {
+        if (this.dir !== dir || this.sortByCol !== colKey) {
             const col = this.findColByKey(colKey);
             this.sortByCol = colKey;
             this.dir = dir;
@@ -126,7 +136,7 @@ export class Table {
     sortArrowIcon(col, direction) {
         const icon = direction === 1 ? Table.SORT_UP_ICON : Table.SORT_DOWN_ICON;
         return createElement('span', {
-            class: `material-icons ${col.key == this.sortByCol && this.dir == direction ? 'selected' : ''}`,
+            class: `material-icons ${col.key === this.sortByCol && this.dir === direction ? 'selected' : ''}`,
             action: direction === 1 ? 'sortUp' : 'sortDown',
             colKey: col.key
         }, icon);
@@ -134,7 +144,7 @@ export class Table {
 
 
     addSortIcons(col) {
-        return createElement('div', { class: 'sort' }, [
+        return createElement('div', {class: 'sort'}, [
             this.sortArrowIcon(col, 1),
             this.sortArrowIcon(col, -1)
         ]);
@@ -146,7 +156,7 @@ export class Table {
         this.currentPage = 0;
         this.pagination.setSelectedPage(this.currentPage);
         const colKey = event.target.attributes.colKey && event.target.attributes.colKey.value;
-        this.searchValue = { 'value': event.target.value, 'colKey': colKey };
+        this.searchValue = {'value': event.target.value, 'colKey': colKey};
         this.renderBody();
     }
 
@@ -164,12 +174,10 @@ export class Table {
     }
 
 
-    colSearchHeader(tr, col) {
-        const td = createElement('div', { class: 'td' }, [
-            createElement('input', { colKey: col.key })
+    colSearchHeader(col) {
+        return createElement('div', {class: 'td'}, [
+            createElement('input', {colKey: col.key})
         ]);
-
-        tr.appendChild(td);
     }
 
 
@@ -183,23 +191,23 @@ export class Table {
 
         if (this.options.searchFields) {
             this.removeInputListener(this.onSearchInputListener);
-            colSearchRow = createElement('div', { class: 'tr' });
+            colSearchRow = createElement('div', {class: 'tr'});
         }
 
         const ths = this.cols.map(col => {
 
             if (this.options.searchFields) {
-                this.colSearchHeader(colSearchRow, col);
+                colSearchRow.appendChild(this.colSearchHeader(col))
             }
 
             const addSortIcons = this.isSortable(col) ? this.addSortIcons(col) : undefined;
-            return createElement('div', { class: 'th' }, [col.header, addSortIcons]);
+            return createElement('div', {class: 'th'}, [col.header, addSortIcons]);
         });
 
-        const tr = createElement('div', { class: 'tr' }, ths);
-        const thead = createElement('div', { class: 'thead' }, [
+
+        const thead = createElement('div', {class: 'thead'}, [
             colSearchRow,
-            tr
+            createElement('div', {class: 'tr'}, ths)
         ]);
 
         this.table.querySelector('.thead').replaceWith(thead);
@@ -210,7 +218,7 @@ export class Table {
 
 
     inputCell(col, value) {
-        const attributs = Object.assign({}, col.input, { value, colKey: col.key });
+        const attributs = Object.assign({}, col.input, {value, colKey: col.key});
         return createElement('input', attributs);
     }
 
@@ -229,7 +237,7 @@ export class Table {
     renderCell(row, col) {
         const className = this.className(row, col);
         const cellContent = this.cellContent(row, col);
-        const td = createElement('div', { class: `td ${className ? className : ''}` });
+        const td = createElement('div', {class: `td ${className ? className : ''}`});
         td.appendChild(cellContent);
 
         return td;
@@ -249,7 +257,8 @@ export class Table {
             if (isFunction(this.options.onInputChange)) {
                 this.options.onInputChange(row);
             }
-        };
+        }
+        ;
     }
 
 
@@ -283,10 +292,10 @@ export class Table {
 
         const trs = data.map((row, rowIndex) => {
             const tds = this.cols.map(col => this.renderCell(row, col));
-            return createElement('div', { class: 'tr', index: this.dataIndex(rowIndex) }, tds);
+            return createElement('div', {class: 'tr', index: this.dataIndex(rowIndex)}, tds);
         });
 
-        const tbody = createElement('div', { class: 'tbody' }, trs);
+        const tbody = createElement('div', {class: 'tbody'}, trs);
         this.table.querySelector('.tbody').replaceWith(tbody);
         this.destoryInputListeners = this.addInputListener('.tbody input', this.onInputChanged);
     }
@@ -330,10 +339,3 @@ export class Table {
     }
 
 }
-
-
-Table.TABLE_CLASS_NAME = 'data-table'
-Table.SORT_UP_ICON = 'arrow_drop_up';
-Table.SORT_DOWN_ICON = 'arrow_drop_down';
-Table.DEFAULT_MAX_ROWS = 10;
-Table.DEFAULT_ROW_HEIGHT = 32;

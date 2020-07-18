@@ -17,8 +17,7 @@ export const createElement = (elementName, attributs = {}, children) => {
 const appendChild = (child, element) => {
     if (isElement(child)) {
         element.appendChild(child);
-    }
-    else if (isString(child) || isNumber(child)) {
+    } else if (isString(child) || isNumber(child)) {
         const text = document.createTextNode(child);
         element.appendChild(text);
     }
@@ -45,6 +44,7 @@ export const isElement = (value) => {
 
 export const createEventListener = (element, event, callback) => {
     element.addEventListener(event, callback, false);
+
     return () => {
         element.removeEventListener(event, callback, false);
     };
@@ -59,3 +59,12 @@ export const forEach = (array, callback) => {
 
 
 export const noop = () => (null);
+
+export const bindAll = (functions, context) => {
+    functions.forEach(funName => {
+
+        if (isFunction(context[funName])) {
+            context[funName] = context[funName].bind(context)
+        }
+    });
+}

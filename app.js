@@ -5,7 +5,8 @@ const data = [];
 for (let i = 0; i <= 1000; i++) {
     data.push({
         name: 'elad' + i,
-        age: i
+        age: i,
+        address: i + 'adress'
     });
 }
 
@@ -15,7 +16,8 @@ const replaceData = [];
 for (let i = 0; i <= 10; i++) {
     replaceData.push({
         name: 'noy' + i,
-        age: i
+        age: i,
+        address: i + 'adress'
     });
 }
 
@@ -35,6 +37,10 @@ const cols = [
         input: {
             type: 'text'
         }
+    },
+    {
+        header: 'Adress',
+        key: 'address',
     },
 
 ]
