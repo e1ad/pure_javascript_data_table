@@ -1,4 +1,4 @@
-import {createElement, isFunction, noop, createEventListener, isNumber} from './../../commons.js';
+import {createElement, isFunction, noop, createEventListener, isNumber} from '../commons.js';
 
 export class Pagination {
 

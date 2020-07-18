@@ -7,8 +7,8 @@ import {
     forEach,
     noop,
     bindAll
-} from './../commons.js';
-import {Pagination} from './pagination/pagination.js'
+} from '../commons.js';
+import {Pagination} from '../pagination/pagination.js'
 
 export class Table {
 

@@ -1,4 +1,4 @@
-import { Table } from './table/table.js';
+import { Table } from './components/table/table.js';
 
 const data = [];
 
