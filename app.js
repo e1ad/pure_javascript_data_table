@@ -69,8 +69,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
 });
 
-
-
-const replace = () => {
+window.replace = () => {
     table.start(replaceData, cols);
 }
