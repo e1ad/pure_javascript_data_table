@@ -1,33 +1,38 @@
-export const createElement = (elementName, attributs = {}, children) => {
+export const createElement = (elementName, attributes = {}, children) => {
     const element = document.createElement(elementName);
 
-    for (let key in attributs) {
-        element.setAttribute(key, attributs[key]);
+    for (let key in attributes) {
+        element.setAttribute(key, attributes[key]);
     }
 
     forEach(
-        Array.isArray(children) ? children : [children],
+        castArray(children),
         child => appendChild(child, element)
     );
 
     return element;
 };
 
-
 const appendChild = (child, element) => {
     if (isElement(child)) {
         element.appendChild(child);
-    } else if (isString(child) || isNumber(child)) {
+    } else if (isPrimitive(child)) {
         const text = document.createTextNode(child);
         element.appendChild(text);
     }
 }
 
+export const castArray = (value) => {
+    return Array.isArray(value) ? value : [value];
+}
+
+export const isPrimitive = (value) => {
+    return isString(value) || isNumber(value);
+}
 
 export const isFunction = (value) => {
     return typeof (value) === 'function';
 };
-
 
 export const isString = (value) => {
     return typeof (value) === 'string';
@@ -41,7 +46,6 @@ export const isElement = (value) => {
     return value instanceof Element;
 }
 
-
 export const createEventListener = (element, event, callback) => {
     element.addEventListener(event, callback, false);
 
@@ -50,13 +54,11 @@ export const createEventListener = (element, event, callback) => {
     };
 };
 
-
 export const forEach = (array, callback) => {
     if (Array.isArray(array) && array.length) {
         array.forEach(callback);
     }
 };
-
 
 export const noop = () => (null);
 

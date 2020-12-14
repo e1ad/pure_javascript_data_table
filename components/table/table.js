@@ -53,7 +53,6 @@ export class Table {
         return Table.DEFAULT_MAX_ROWS;
     }
 
-
     addClickListener() {
         this.tableClickDestory = createEventListener(this.table, 'click', event => {
 
@@ -75,11 +74,9 @@ export class Table {
         });
     }
 
-
     findColByKey(colKey) {
         return this.cols.find(col => col.key === colKey);
     }
-
 
     getSortCallback(col) {
         if (typeof (col.sort) === 'object' && col.sort.callBack) {
@@ -89,28 +86,24 @@ export class Table {
         return (a, b) => a[col.key] > b[col.key] ? this.dir : -1 * this.dir
     }
 
-
     sort(dir, colKey) {
         if (this.dir !== dir || this.sortByCol !== colKey) {
             const col = this.findColByKey(colKey);
             this.sortByCol = colKey;
             this.dir = dir;
             this.data.sort(this.getSortCallback(col));
-            this.rederHeader();
+            this.renderHeader();
             this.renderBody();
         }
     }
-
 
     sortUp(attributes) {
         this.sort(1, attributes.colKey.value);
     }
 
-
     sortDown(attributes) {
         this.sort(-1, attributes.colKey.value);
     }
-
 
     displayValue(row, col) {
         if (isFunction(col.displayValue)) {
@@ -119,7 +112,6 @@ export class Table {
 
         return row[col.key];
     }
-
 
     className(row, col) {
         switch (typeof (col.className)) {
@@ -132,7 +124,6 @@ export class Table {
         }
     }
 
-
     sortArrowIcon(col, direction) {
         const icon = direction === 1 ? Table.SORT_UP_ICON : Table.SORT_DOWN_ICON;
         return createElement('span', {
@@ -142,15 +133,12 @@ export class Table {
         }, icon);
     }
 
-
     addSortIcons(col) {
         return createElement('div', {class: 'sort'}, [
             this.sortArrowIcon(col, 1),
             this.sortArrowIcon(col, -1)
         ]);
-
     }
-
 
     onSearchInput(event) {
         this.currentPage = 0;
@@ -159,7 +147,6 @@ export class Table {
         this.searchValue = {'value': event.target.value, 'colKey': colKey};
         this.renderBody();
     }
-
 
     searchAndFilter(data) {
         if (this.searchValue && this.searchValue.value) {
@@ -173,20 +160,17 @@ export class Table {
         return data;
     }
 
-
     colSearchHeader(col) {
         return createElement('div', {class: 'td'}, [
             createElement('input', {colKey: col.key})
         ]);
     }
 
-
     isSortable(col) {
         return col.sort === undefined || col.sort === true;
     }
 
-
-    rederHeader() {
+    renderHeader() {
         let colSearchRow;
 
         if (this.options.searchFields) {
@@ -216,12 +200,10 @@ export class Table {
         }
     }
 
-
     inputCell(col, value) {
         const attributs = Object.assign({}, col.input, {value, colKey: col.key});
         return createElement('input', attributs);
     }
-
 
     cellContent(row, col) {
         const value = this.displayValue(row, col);
@@ -233,7 +215,6 @@ export class Table {
         return document.createTextNode(value);
     }
 
-
     renderCell(row, col) {
         const className = this.className(row, col);
         const cellContent = this.cellContent(row, col);
@@ -242,7 +223,6 @@ export class Table {
 
         return td;
     }
-
 
     onInputChanged(event) {
         const indexAttr = event.target.parentElement.parentElement.attributes.index;
@@ -254,37 +234,34 @@ export class Table {
         if (row) {
             row[colKeyAttr.value] = value;
             event.target.setAttribute('value', value);
+
             if (isFunction(this.options.onInputChange)) {
                 this.options.onInputChange(row);
             }
         }
-        ;
     }
-
 
     removeInputListener(destoryInputListeners) {
         forEach(destoryInputListeners, destoryInputListener => destoryInputListener());
     }
 
-
     addInputListener(selector, func) {
         const inputs = this.table.querySelectorAll(selector);
+
         return [...inputs].map(input => {
             return createEventListener(input, 'input', func);
         });
     }
 
-
     dataIndex(rowIndex) {
         return this.currentPage * this.maxRows + rowIndex;
     }
 
-
     currentPageData() {
         const offset = this.currentPage * this.maxRows;
+
         return this.searchAndFilter(this.data).slice(offset, offset + this.maxRows);
     }
-
 
     renderBody() {
         this.removeInputListener(this.destoryInputListeners);
@@ -300,26 +277,22 @@ export class Table {
         this.destoryInputListeners = this.addInputListener('.tbody input', this.onInputChanged);
     }
 
-
     onPageClick(pageNumber) {
         this.currentPage = pageNumber;
         this.renderBody();
     }
-
 
     reset() {
         this.searchValue = '';
         this.currentPage = 0;
     }
 
-
     onDomReady() {
         this.maxRows = this.getMaxRows();
         this.pagination.start(this.data.length, this.maxRows, this.onPageClick);
-        this.rederHeader();
+        this.renderHeader();
         this.renderBody();
     }
-
 
     start(data, cols) {
         if (isElement(this.target)) {

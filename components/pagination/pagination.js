@@ -23,21 +23,23 @@ export class Pagination {
 
     addClickListener() {
         this.tableClickDestory = createEventListener(this.target, 'click', (event) => {
-            if (event.target.nodeName === 'LI') {
 
-                if (event.target.className.indexOf(Pagination.PAGE_NUMBER_CLASS) > -1 && isFunction(this.onClick)) {
-                    const currentPage = Number(event.target.innerText) - 1;
-                    this.setSelectedPage(currentPage);
-                    this.onClick(currentPage);
+            if (event.target.nodeName !== 'LI') {
+                return;
+            }
+
+            if (event.target.classList.contains(Pagination.PAGE_NUMBER_CLASS) && isFunction(this.onClick)) {
+                const currentPage = Number(event.target.innerText) - 1;
+                this.setSelectedPage(currentPage);
+                this.onClick(currentPage);
+            }
+
+            if (event.target.attributes.action) {
+                const action = event.target.attributes.action.value;
+                
+                if (isFunction(this[action])) {
+                    this[action]();
                 }
-
-                if (event.target.attributes.action) {
-                    const action = event.target.attributes.action.value;
-                    if (isFunction(this[action])) {
-                        this[action]();
-                    }
-                }
-
             }
         });
     }
