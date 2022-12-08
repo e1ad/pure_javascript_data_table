@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/e1ad/pure_javascript_data_table#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.18.2"
   }
 }
